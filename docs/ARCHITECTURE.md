@@ -30,11 +30,12 @@ Person(admin, "Administrator")
 
 System_Boundary(s1, "College Feedback Portal"){
   Container(web, "Web App (React + TS)", "React 18, TypeScript, Tailwind", "SPA served statically, communicates with API via REST")
-  Container(api, "API Server", "Node.js (NestJS/Express)", "Auth, Users, Feedback, Forms, Reports, Notifications")
-  ContainerDb(db, "Relational DB", "PostgreSQL", "Users, Roles, Forms, Responses, Courses, Events, Reports")
+  Container(api, "API Server", "Node.js (Express)", "Auth, Users, Feedback, Forms, Reports, Notifications, Realtime")
+  ContainerDb(db, "Database", "MongoDB Atlas", "Users, Forms, Responses, Courses, Events, Notifications, Analytics (documents)")
   Container(queue, "Message Queue", "RabbitMQ/SQS", "Async processing: email, report generation, analytics")
   Container(cache, "Cache", "Redis", "Sessions, rate limiting, caching")
-  Container(storage, "Object Storage", "S3/Blob Storage", "Exports, attachments, backups")
+  Container(storage, "Object Storage", "S3/Blob Storage", "Exports, large attachments, backups; complements GridFS")
+  Container(realtime, "Realtime Gateway", "Socket.io/WebSockets", "Live notifications and updates")
 }
 System_Ext(email, "Email/SMS Gateway")
 System_Ext(lms, "LMS/SIS")
@@ -43,12 +44,13 @@ Rel(student, web, "Uses", "HTTPS")
 Rel(faculty, web, "Uses", "HTTPS")
 Rel(admin, web, "Uses", "HTTPS")
 Rel(web, api, "REST/JSON over HTTPS")
-Rel(api, db, "SQL")
+Rel(api, db, "MongoDB wire protocol (CRUD, Aggregations, Change Streams)")
 Rel(api, cache, "Cache + Session Store")
 Rel(api, queue, "Publishes tasks")
 Rel(queue, email, "Sends notifications")
 Rel(api, storage, "File operations")
 Rel(api, lms, "Imports data", "OAuth2/API Key")
+Rel(api, realtime, "Push updates to clients")
 ```
 
 ## Component Diagram (C4: Level 3) - Frontend

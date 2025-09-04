@@ -7,6 +7,8 @@ Filtering: Query params with exact match or `gt, gte, lt, lte, like, in` operato
 Sorting: `sort=field,-otherField`.
 Idempotency: `Idempotency-Key` header for POST operations where relevant.
 
+Backend: Node.js (Express) + MongoDB (Atlas) via Mongoose. Advanced analytics via MongoDB Aggregation Framework. Realtime via Socket.io or Server-Sent Events.
+
 ## Auth
 - POST `/auth/login` — email, password
 - POST `/auth/refresh`
@@ -36,6 +38,7 @@ Content-Type: application/json
 - PATCH `/users/:id` (self or admin)
 - DELETE `/users/:id` (admin)
 - POST `/users/bulk-import` (admin)
+- GET `/users/search?q=...` (admin) — full-text search (MongoDB text index)
 
 ## Roles & Permissions
 - GET `/roles` (admin)
@@ -59,6 +62,7 @@ Content-Type: application/json
 - GET `/forms/:id/versions/:version`
 - POST `/forms/:id/versions/:version/publish` (admin)
 - POST `/forms/:id/versions/:version/assign` (admin)
+ - GET `/forms/:id/analytics` (faculty/admin) — aggregated metrics via MongoDB pipelines
 
 ### Question Editor Helpers
 - GET `/forms/:id/versions/:version/questions`
@@ -73,6 +77,8 @@ Content-Type: application/json
 - PATCH `/responses/:id` — update draft
 - POST `/responses/:id/submit` — final submit
 - GET `/responses` — list own responses
+ - GET `/responses/analytics` (faculty/admin) — aggregate analytics
+ - GET `/responses/search?q=...` — full-text search responses
 
 ## Analytics & Reports
 - GET `/analytics/overview` (faculty/admin)
@@ -80,11 +86,13 @@ Content-Type: application/json
 - GET `/analytics/compare` (faculty/admin)
 - POST `/reports` — enqueue report generation
 - GET `/reports/:id` — status + signed URL if ready
+ - POST `/analytics/custom` — submit custom aggregation pipelines (secured presets)
 
 ## Notifications
 - GET `/notifications` — in-app
 - PATCH `/notifications/:id/read`
 - POST `/notifications/test` (admin)
+ - GET `/stream/notifications` — SSE realtime notifications
 
 ## Chief Guest / Events
 - GET `/events`
@@ -94,6 +102,7 @@ Content-Type: application/json
 - POST `/events/:id/guests`
 - POST `/events/:id/forms/:formVersionId/assign`
 - POST `/events/:id/collect` — public/QR endpoint to capture feedback
+ - GET `/events/:id/analytics` — event-specific analytics
 
 ## Error Format
 ```json
@@ -108,15 +117,23 @@ Content-Type: application/json
 
 ## Schemas (abridged)
 ```ts
-// User
-interface User { id: string; email: string; firstName: string; lastName: string; roles: string[]; isActive: boolean; }
+// User (MongoDB)
+interface User { _id: string; email: string; role: 'student'|'faculty'|'admin'; profile: any; status: 'active'|'inactive'|'suspended'; createdAt: string; updatedAt: string }
 
-// Form Version
-interface FormVersion { id: string; formId: string; version: number; status: 'draft'|'published'|'archived'; schema: any; }
+// Form Version (embedded schema)
+interface FormVersion { _id: string; formId: string; version: number; status: 'draft'|'published'|'archived'; sections: any[] }
 
-// Assignment
-interface Assignment { id: string; formVersionId: string; courseId?: string; openAt: string; closeAt: string; allowAnonymous: boolean; }
+// Assignment (document)
+interface Assignment { _id: string; formVersionId: string; courseId?: string; openAt: string; closeAt: string; allowAnonymous: boolean }
 
 // Response
-interface FeedbackResponse { id: string; formAssignmentId: string; responderId?: string; answers: any; status: 'draft'|'submitted'|'void'; submittedAt?: string; isAnonymous: boolean; }
+interface FeedbackResponse { _id: string; formId: string; userId?: string; isAnonymous: boolean; status: 'draft'|'submitted'|'reviewed'; responses: any[]; ratings?: any; metadata?: any; createdAt: string; updatedAt: string }
 ```
+
+## Realtime
+- WebSocket: `ws /socket.io` namespaces for dashboards and forms (join `dashboard-{userId}`, `form-{formId}`)
+- SSE: `/stream/responses`, `/stream/analytics`, `/stream/notifications`
+
+Events
+- `responseSubmitted` — payload: `{ responseId, formId, userId, submittedAt }`
+- `analyticsUpdated` — payload: `{ scope, metrics }`

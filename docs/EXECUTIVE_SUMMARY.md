@@ -8,6 +8,7 @@ The College Feedback Portal is an enterprise-grade, web-based platform that stre
 - Automated Reporting: Real-time analytics and customizable report generation.
 - Scalable Architecture: Supports varied institutional sizes and complexities.
 - Role-Based Access Control: Secure, permission-based system access.
+- NoSQL Flexibility: MongoDB-powered data storage for dynamic content and scalability.
 
 ## Vision & Mission
 - Vision: A unified platform that empowers institutions to collect, analyze, and act on feedback effectively, fostering continuous improvement.
@@ -25,10 +26,12 @@ The College Feedback Portal is an enterprise-grade, web-based platform that stre
 - Admin Portal: User management, drag-and-drop form builder with versioning, reports, system settings.
 - Special: Chief Guest Feedback for events with real-time collection and post-event analytics.
 
-## Technical Architecture (Frontend Focus)
-- React 18 + TypeScript, Tailwind CSS, Context API + useReducer, Recharts, date-fns, Axios.
-- State via Context Providers: Auth, Feedback, Admin, Theme, Notification.
-- Utilities: validators, formatters, helpers; services for API integrations.
+## Technical Architecture Overview
+- Frontend: React 18 + TypeScript, Tailwind CSS, Context API + useReducer, Recharts, date-fns, Axios.
+- Backend: Node.js (Express), JWT auth, validation middleware, Socket.io for realtime notifications.
+- Database: MongoDB Atlas (NoSQL) using Mongoose with aggregations, change streams, and optional GridFS for large files.
+- Caching/Queueing: Redis for caching/sessions; SQS/RabbitMQ for async tasks (emails, reports, analytics).
+- Storage: Object storage (S3/Blob) for exports and large attachments.
 - Testing: Jest + React Testing Library; E2E with Cypress.
 
 ## Cross-cutting Concerns

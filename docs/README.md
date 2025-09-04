@@ -11,6 +11,9 @@ This directory contains the core technical and project documentation.
 - [NFR_SLOs.md](./NFR_SLOs.md)
 - [IMPLEMENTATION_ROADMAP.md](./IMPLEMENTATION_ROADMAP.md)
 - [TESTING_STRATEGY.md](./TESTING_STRATEGY.md)
+ - [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md)
+ - [MONGODB_SETUP.md](./MONGODB_SETUP.md)
+ - [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)
 
 ## How to Use
 - Start with the Executive Summary for goals and value props.
